@@ -5,8 +5,7 @@
 ## 🌐 Demo en Vivo
 
 Prueba la aplicación desplegada en Heroku:  
-👉 **[Probar Calculadora en Vivo](https://data360-credit-calculator.herokuapp.com)**  
-*(Requiere deploy previo — ver sección [Despliegue en Heroku](#-despliegue-en-heroku))*
+👉 **[Probar Calculadora en Vivo](https://d360-credit-calculator-222f2590f5a1.herokuapp.com)**
 
 ---
 
