@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, AlertTriangle, Info } from 'lucide-react';
 import { FormData } from '../types';
-import { INDUSTRY_OPTIONS, CHANNEL_OPTIONS, DATA_SOURCE_OPTIONS } from '../data/industryDefaults';
+import { INDUSTRY_OPTIONS, CHANNEL_OPTIONS, INDUSTRY_CORE_SOURCES, DEFAULT_CORE_SOURCES, TRANSVERSAL_SOURCE_GROUPS } from '../data/industryDefaults';
+import type { DataSourceOption } from '../data/industryDefaults';
 import LogoUploader from './LogoUploader';
 
 interface QuestionnaireFormProps {
@@ -66,6 +67,36 @@ const IDENTITY_OPTIONS = [
     examples: 'Ej: Omnicanal completo, B2B2C, datos de terceros',
   },
 ];
+
+const CheckboxCard: React.FC<{
+  src: DataSourceOption;
+  selected: boolean;
+  onToggle: () => void;
+}> = ({ src, selected, onToggle }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+      selected
+        ? 'border-sf-blue bg-blue-50'
+        : 'border-gray-200 bg-white hover:border-sf-blue hover:bg-blue-50/30'
+    }`}
+  >
+    <div className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+      selected ? 'bg-sf-blue border-sf-blue' : 'border-gray-300'
+    }`}>
+      {selected && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+    </div>
+    <div>
+      <div className="text-xs font-semibold text-gray-800">{src.icon} {src.label}</div>
+      <div className="text-[11px] text-gray-500 mt-0.5">{src.description}</div>
+    </div>
+  </button>
+);
 
 const SliderField: React.FC<{
   label: string;
@@ -343,54 +374,106 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
             )}
           </div>
 
-          {/* Connected Systems — checkboxes */}
+          {/* Connected Systems — counter + contextual + transversal */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               ¿Qué sistemas o fuentes aportarán datos a Data Cloud?
             </label>
             <p className="text-xs text-gray-500 mb-3">
-              Indica de dónde provendrán los datos para construir la vista unificada (Golden Record).
+              Selecciona las fuentes que aportarán datos al Golden Record. Ajusta el contador si tienes fuentes adicionales no listadas.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {DATA_SOURCE_OPTIONS.map((src) => {
-                const selected = (formData.connectedSystemsSelected || []).includes(src.value);
-                return (
-                  <button
-                    key={src.value}
-                    type="button"
-                    onClick={() => {
-                      const current = formData.connectedSystemsSelected || [];
-                      const updated = selected
-                        ? current.filter((s) => s !== src.value)
-                        : [...current, src.value];
-                      onChange({ connectedSystemsSelected: updated, connectedSystems: updated.length });
-                    }}
-                    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
-                      selected
-                        ? 'border-sf-blue bg-blue-50'
-                        : 'border-gray-200 bg-white hover:border-sf-blue hover:bg-blue-50/30'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
-                      selected ? 'bg-sf-blue border-sf-blue' : 'border-gray-300'
-                    }`}>
-                      {selected && (
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-gray-800">{src.icon} {src.label}</div>
-                      <div className="text-[11px] text-gray-500 mt-0.5">{src.description}</div>
-                    </div>
-                  </button>
-                );
-              })}
+
+            {/* Total counter stepper */}
+            <div className="flex items-center justify-between mb-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+              <div>
+                <p className="text-xs font-semibold text-gray-700">Total de sistemas a conectar</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Incluye fuentes no listadas abajo</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onChange({ connectedSystems: Math.max(0, formData.connectedSystems - 1) })}
+                  className="w-7 h-7 rounded-full border border-blue-300 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-all font-bold text-base leading-none"
+                >−</button>
+                <span className="text-xl font-bold text-sf-blue w-8 text-center">{formData.connectedSystems}</span>
+                <button
+                  type="button"
+                  onClick={() => onChange({ connectedSystems: formData.connectedSystems + 1 })}
+                  className="w-7 h-7 rounded-full border border-blue-300 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-all font-bold text-base leading-none"
+                >+</button>
+              </div>
             </div>
+
+            {/* Contextual core sources (industry-specific) */}
+            {(() => {
+              const coreSources = (formData.industry && INDUSTRY_CORE_SOURCES[formData.industry])
+                ? INDUSTRY_CORE_SOURCES[formData.industry]
+                : DEFAULT_CORE_SOURCES;
+              return (
+                <div className="mb-4">
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                    Sistemas Core Operativos
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {coreSources.map((src) => {
+                      const selected = (formData.connectedSystemsSelected || []).includes(src.value);
+                      return (
+                        <CheckboxCard
+                          key={src.value}
+                          src={src}
+                          selected={selected}
+                          onToggle={() => {
+                            const current = formData.connectedSystemsSelected || [];
+                            const updated = selected
+                              ? current.filter((s) => s !== src.value)
+                              : [...current, src.value];
+                            onChange({
+                              connectedSystemsSelected: updated,
+                              connectedSystems: Math.max(formData.connectedSystems, updated.length),
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Transversal source groups */}
+            {TRANSVERSAL_SOURCE_GROUPS.map((group) => (
+              <div key={group.group} className="mb-4">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  {group.groupLabel}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {group.sources.map((src) => {
+                    const selected = (formData.connectedSystemsSelected || []).includes(src.value);
+                    return (
+                      <CheckboxCard
+                        key={src.value}
+                        src={src}
+                        selected={selected}
+                        onToggle={() => {
+                          const current = formData.connectedSystemsSelected || [];
+                          const updated = selected
+                            ? current.filter((s) => s !== src.value)
+                            : [...current, src.value];
+                          onChange({
+                            connectedSystemsSelected: updated,
+                            connectedSystems: Math.max(formData.connectedSystems, updated.length),
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
             {(formData.connectedSystemsSelected || []).length > 0 && (
-              <p className="text-xs text-sf-blue mt-2 font-medium">
-                {(formData.connectedSystemsSelected || []).length} sistema{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''} seleccionado{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''}
+              <p className="text-xs text-sf-blue font-medium">
+                {(formData.connectedSystemsSelected || []).length} fuente{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''} identificada{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''}
               </p>
             )}
           </div>

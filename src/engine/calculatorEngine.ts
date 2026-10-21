@@ -10,6 +10,7 @@ const INDUSTRY_DEFAULTS: Record<string, { daily_update: number; lookback_months:
   media:              { daily_update: 25, lookback_months: 12 },
   automotive:         { daily_update: 5,  lookback_months: 24 },
   education:          { daily_update: 6,  lookback_months: 24 },
+  travel_hospitality: { daily_update: 12, lookback_months: 24 },
 };
 
 export function calculate(form: FormData): CalculationResult {

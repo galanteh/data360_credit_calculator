@@ -9,6 +9,19 @@ export interface IndustryOption {
   defaultSegments: number;
 }
 
+export interface DataSourceOption {
+  value: string;
+  label: string;
+  description: string;
+  icon: string;
+}
+
+export interface TransversalSourceGroup {
+  group: string;
+  groupLabel: string;
+  sources: DataSourceOption[];
+}
+
 export const INDUSTRY_OPTIONS: IndustryOption[] = [
   {
     value: 'financial_services',
@@ -61,6 +74,16 @@ export const INDUSTRY_OPTIONS: IndustryOption[] = [
     defaultSegments: 150,
   },
   {
+    value: 'travel_hospitality',
+    label: 'Travel, Transportation & Hospitality',
+    description: 'Hotelería, aerolíneas, cruceros y logística para viajes personalizados, programas de lealtad y reservas.',
+    icon: '🏨',
+    color: '#00A1E0',
+    defaultProfiles: 2_000_000,
+    defaultEngagement: 10_000_000,
+    defaultSegments: 120,
+  },
+  {
     value: 'communications',
     label: 'Communications',
     description: 'Proveedores de telecomunicaciones y suscripciones.',
@@ -111,14 +134,92 @@ export const CHANNEL_OPTIONS = [
   { value: 'mobile', label: 'App Móvil', icon: '📱' },
   { value: 'crm', label: 'CRM / Salesforce', icon: '🤝' },
   { value: 'cdp', label: 'CDP Downstream', icon: '🔄' },
+  { value: 'loyalty', label: 'Programas de Lealtad', icon: '🎁' },
+  { value: 'agentforce', label: 'Agentforce', icon: '🤖' },
+  { value: 'third_party', label: 'Sistemas de Terceros (APIs)', icon: '🔌' },
 ];
 
-export const DATA_SOURCE_OPTIONS = [
-  { value: 'crm', label: 'CRM / Ventas', description: 'Salesforce Sales/Service Cloud u otro CRM', icon: '🤝' },
-  { value: 'erp', label: 'ERP / Finanzas', description: 'SAP, Oracle, NetSuite', icon: '🏢' },
-  { value: 'ecommerce', label: 'Comercio Digital', description: 'Commerce Cloud, Shopify, Magento', icon: '🛒' },
-  { value: 'pos', label: 'Puntos de Venta (POS)', description: 'Sistemas de caja y retail físico', icon: '🏪' },
-  { value: 'digital', label: 'Comportamiento Digital / Apps', description: 'Google Analytics, SDK móvil, navegación web', icon: '📊' },
-  { value: 'datalake', label: 'Data Lake / DWH', description: 'Snowflake, BigQuery, Databricks, Amazon S3', icon: '🗄️' },
-  { value: 'marketing', label: 'Marketing & Pauta', description: 'Marketing Cloud, Meta Ads, Google Ads', icon: '📣' },
+export const INDUSTRY_CORE_SOURCES: Record<string, DataSourceOption[]> = {
+  travel_hospitality: [
+    { value: 'pms', label: 'PMS (Property Management System)', description: 'Opera, Infor, Mews, Cloudbeds', icon: '🏨' },
+    { value: 'crs', label: 'Motor de Reservas / CRS', description: 'Sabre, Amadeus, IBS, Travelport', icon: '📋' },
+    { value: 'loyalty', label: 'Plataforma de Lealtad / Puntos', description: 'Loyalty Engine, Comarch, OpenLoyalty', icon: '⭐' },
+    { value: 'gds', label: 'GDS (Global Distribution System)', description: 'Sabre GDS, Amadeus, Galileo, Worldspan', icon: '🌐' },
+  ],
+  healthcare: [
+    { value: 'ehr', label: 'EHR / EMR (Expediente Clínico)', description: 'Epic, Cerner, Meditech, Athena', icon: '📋' },
+    { value: 'scheduling', label: 'Sistema de Citas y Admisión', description: 'Gestión de agenda y admisiones hospitalarias', icon: '📅' },
+    { value: 'pharmacy', label: 'Farmacia / Laboratorio', description: 'Sistemas de farmacia y laboratorio clínico', icon: '💊' },
+  ],
+  financial_services: [
+    { value: 'core_banking', label: 'Core Bancario / Core Asegurador', description: 'Temenos, Finastra, FIS, Guidewire', icon: '🏦' },
+    { value: 'policies', label: 'Sistema de Pólizas y Siniestros', description: 'Policy & claims management', icon: '📄' },
+    { value: 'trading', label: 'Plataformas de Inversión / Trading', description: 'Bloomberg, Refinitiv, Murex', icon: '📈' },
+  ],
+  retail: [
+    { value: 'pos_retail', label: 'Puntos de Venta Físicos (POS)', description: 'Oracle Retail, NCR, Square, Lightspeed', icon: '🏪' },
+    { value: 'ecommerce', label: 'E-commerce', description: 'Commerce Cloud, Shopify, Magento', icon: '🛒' },
+    { value: 'erp_retail', label: 'ERP / Catálogo de Productos', description: 'SAP, Oracle, Microsoft Dynamics', icon: '🏢' },
+  ],
+  consumer_goods: [
+    { value: 'pos_cg', label: 'Puntos de Venta Físicos (POS)', description: 'Oracle Retail, NCR, Square', icon: '🏪' },
+    { value: 'ecommerce_cg', label: 'E-commerce / DTC', description: 'Commerce Cloud, Shopify, Magento', icon: '🛒' },
+    { value: 'erp_cg', label: 'ERP / Catálogo de Productos', description: 'SAP, Oracle, Microsoft Dynamics', icon: '🏢' },
+  ],
+};
+
+export const DEFAULT_CORE_SOURCES: DataSourceOption[] = [
+  { value: 'erp_generic', label: 'ERP / Facturación', description: 'SAP, Oracle, NetSuite', icon: '🏢' },
+  { value: 'crm_core', label: 'Base de Clientes / Sistema Maestro', description: 'CRM u otro sistema maestro de clientes', icon: '👥' },
+];
+
+export const TRANSVERSAL_SOURCE_GROUPS: TransversalSourceGroup[] = [
+  {
+    group: 'crm_sales',
+    groupLabel: 'CRM & Ventas',
+    sources: [
+      { value: 'sf_crm', label: 'Salesforce CRM (Sales/Service)', description: 'Sales Cloud, Service Cloud, otros orgs', icon: '☁️' },
+      { value: 'other_crm', label: 'Otro CRM', description: 'HubSpot, Microsoft Dynamics, Zoho CRM', icon: '🤝' },
+    ],
+  },
+  {
+    group: 'service_callcenter',
+    groupLabel: 'Atención & Call Center',
+    sources: [
+      { value: 'service_desk', label: 'Service Cloud / Zendesk', description: 'Gestión de casos, tickets y soporte', icon: '🎧' },
+      { value: 'cti', label: 'Telefonía / CTI / IVR', description: 'Genesys, Amazon Connect, Avaya, Five9', icon: '📞' },
+    ],
+  },
+  {
+    group: 'ingestion',
+    groupLabel: 'Mecanismos de Ingesta & Archivos',
+    sources: [
+      { value: 'api_webhooks', label: 'APIs / Webhooks en tiempo real', description: 'REST APIs, event streams, webhooks', icon: '🔌' },
+      { value: 'sftp_files', label: 'Archivos / SFTP / Lotes planos', description: 'CSV, Amazon S3, Azure Blob, FTP', icon: '📁' },
+    ],
+  },
+  {
+    group: 'digital',
+    groupLabel: 'Comportamiento Digital',
+    sources: [
+      { value: 'mobile_sdk', label: 'App Móvil (SDK)', description: 'Firebase, Segment, Amplitude, MParticle', icon: '📱' },
+      { value: 'web_analytics', label: 'Navegación Web / Tag Management', description: 'Google Analytics, Adobe Analytics, GTM', icon: '🌐' },
+    ],
+  },
+  {
+    group: 'data_platform',
+    groupLabel: 'Data Lake & DWH',
+    sources: [
+      { value: 'datalake', label: 'Snowflake / BigQuery / Databricks', description: 'Cloud data warehouse o data lakehouse', icon: '🗄️' },
+      { value: 'cloud_dw', label: 'Amazon Redshift / Azure Synapse', description: 'Data warehouse en AWS o Azure', icon: '☁️' },
+    ],
+  },
+  {
+    group: 'marketing',
+    groupLabel: 'Marketing & Medios',
+    sources: [
+      { value: 'marketing_cloud', label: 'Salesforce Marketing Cloud', description: 'Email, SMS, Mobile Push, Journeys', icon: '📧' },
+      { value: 'paid_ads', label: 'Plataformas de Pauta', description: 'Google Ads, Meta Ads, DV360, The Trade Desk', icon: '📣' },
+    ],
+  },
 ];
