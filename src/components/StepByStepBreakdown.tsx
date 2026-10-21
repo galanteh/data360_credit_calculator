@@ -23,12 +23,6 @@ const INDUSTRY_PARAMS: Record<string, { daily_update: number; lookback_months: n
   travel_hospitality: { daily_update: 12, lookback_months: 24 },
 };
 
-const EDITION_LABELS: Record<string, string> = {
-  flex:       'Data Cloud Flex (sin descuento)',
-  profiles:   'Profiles & Flex (−15%)',
-  enterprise: 'Enterprise Profiles & Flex (−30%)',
-};
-
 // ── Sub-components ────────────────────────────────────────────────────────
 
 const FormulaBox: React.FC<{ label: string; content: string; variant?: 'symbolic' | 'sub' }> = ({
@@ -97,13 +91,6 @@ const StepByStepBreakdown: React.FC<Props> = ({ result, formData, onClose }) => 
   const segs      = formData.segments;
   const refresh   = formData.refreshFreq;
   const acts      = formData.activationsYr;
-
-  const rawIngestion  = result.batchPipelineCredits + result.transformCredits;
-  const rawStreaming   = result.streamEngCredits + result.streamProfCredits + result.streamTransformCredits;
-  const discountFactor = formData.edition === 'profiles' ? 0.85 : formData.edition === 'enterprise' ? 0.70 : 1.0;
-  const discountPct    = formData.edition === 'profiles' ? 15  : formData.edition === 'enterprise' ? 30   : 0;
-  const ingDiscount    = rawIngestion - result.ingestionCredits;
-  const strDiscount    = rawStreaming  - result.streamingCredits;
 
   interface Section {
     id: string;
@@ -233,7 +220,6 @@ const StepByStepBreakdown: React.FC<Props> = ({ result, formData, onClose }) => 
     { label: 'IR Rulesets',      value: String(rulesets) },
     { label: 'Segmentos',        value: String(segs) },
     { label: 'Refresh/día',      value: `${refresh}×` },
-    { label: 'Edición',          value: EDITION_LABELS[formData.edition] },
   ];
 
   return (
@@ -356,134 +342,95 @@ const StepByStepBreakdown: React.FC<Props> = ({ result, formData, onClose }) => 
         );
       })}
 
-      {/* Edition Discount Section */}
+      {/* Rate Card — Official Flex Credits Rates */}
       <div className="bg-white rounded-2xl border-2 border-blue-200 overflow-hidden shadow-sm">
         <button
           type="button"
           className="w-full flex items-center justify-between px-5 py-4 hover:bg-blue-50 transition-colors text-left"
-          onClick={() => toggle('edition_discount')}
+          onClick={() => toggle('rate_card')}
         >
           <div className="flex items-center gap-3">
-            <span className="text-xl">🏷️</span>
+            <span className="text-xl">📋</span>
             <div>
               <p className="font-semibold text-gray-800 text-sm">
-                Descuento por Edición — {EDITION_LABELS[formData.edition]}
+                Rate Card Oficial — Tarifas de Flex Credits Data 360
               </p>
-              {!expanded['edition_discount'] && (
+              {!expanded['rate_card'] && (
                 <p className="text-xs text-blue-500 mt-0.5">
-                  Aplicado sobre Ingesta + Streaming · Ahorro: {fmtNum(ingDiscount + strDiscount)} créditos
+                  21 operaciones · Modelo de consumo puro sin descuentos por edición
                 </p>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-            {discountPct > 0 && (
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
-                −{discountPct}%
-              </span>
-            )}
-            {expanded['edition_discount']
-              ? <ChevronDown className="w-4 h-4 text-gray-400" />
-              : <ChevronRight className="w-4 h-4 text-gray-400" />
-            }
-          </div>
-        </button>
-
-        {expanded['edition_discount'] && (
-          <div className="px-5 pb-5 border-t border-gray-100">
-            <div className="mt-4 text-xs text-gray-500 bg-gray-50 rounded-lg p-3 mb-4 leading-relaxed">
-              El descuento por edición se aplica <strong>únicamente</strong> sobre los créditos de{' '}
-              <strong>Ingesta (Batch Pipeline + Transform)</strong> y <strong>Streaming</strong>.
-              Las categorías de Identity Resolution, Calculated Insights, Queries, Segmentación,
-              Activación y Data Graphs <strong>NO</strong> reciben descuento.
-            </div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[11px] text-gray-400 uppercase tracking-wide border-b border-gray-100">
-                  <th className="text-left pb-2">Categoría</th>
-                  <th className="text-right pb-2">Créditos Brutos</th>
-                  <th className="text-right pb-2">Factor</th>
-                  <th className="text-right pb-2">Créditos Netos</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                <tr>
-                  <td className="py-2 text-gray-700">Ingesta (Batch + Transform)</td>
-                  <td className="py-2 text-right font-mono text-gray-500">{fmtNum(rawIngestion)}</td>
-                  <td className="py-2 text-right font-mono text-blue-600">× {discountFactor.toFixed(2)}</td>
-                  <td className="py-2 text-right font-mono font-bold text-gray-800">{fmtNum(result.ingestionCredits)}</td>
-                </tr>
-                <tr>
-                  <td className="py-2 text-gray-700">Streaming (Eng + Prof + Transform)</td>
-                  <td className="py-2 text-right font-mono text-gray-500">{fmtNum(rawStreaming)}</td>
-                  <td className="py-2 text-right font-mono text-blue-600">× {discountFactor.toFixed(2)}</td>
-                  <td className="py-2 text-right font-mono font-bold text-gray-800">{fmtNum(result.streamingCredits)}</td>
-                </tr>
-                <tr className="bg-blue-50">
-                  <td className="py-2 font-semibold text-blue-700">Ahorro Total</td>
-                  <td className="py-2 text-right font-mono text-gray-500">{fmtNum(rawIngestion + rawStreaming)}</td>
-                  <td className="py-2 text-right font-mono text-blue-600">−{discountPct}%</td>
-                  <td className="py-2 text-right font-mono font-bold text-blue-700">
-                    −{fmtNum(ingDiscount + strDiscount)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* SKU Calculation */}
-      <div className="bg-white rounded-2xl border-2 border-green-200 overflow-hidden shadow-sm">
-        <button
-          type="button"
-          className="w-full flex items-center justify-between px-5 py-4 hover:bg-green-50 transition-colors text-left"
-          onClick={() => toggle('sku')}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">📦</span>
-            <div>
-              <p className="font-semibold text-gray-800 text-sm">
-                Cálculo de SKUs — Data Services Credits (DSC)
-              </p>
-              {!expanded['sku'] && (
-                <p className="text-xs text-green-600 mt-0.5">
-                  ⌈{fmtNum(result.totalCredits)} ÷ 100,000⌉ = {result.dscSkus} SKU{result.dscSkus !== 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">
-              {result.dscSkus} SKU{result.dscSkus !== 1 ? 's' : ''}
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+              21 tarifas
             </span>
-            {expanded['sku']
+            {expanded['rate_card']
               ? <ChevronDown className="w-4 h-4 text-gray-400" />
               : <ChevronRight className="w-4 h-4 text-gray-400" />
             }
           </div>
         </button>
 
-        {expanded['sku'] && (
+        {expanded['rate_card'] && (
           <div className="px-5 pb-5 border-t border-gray-100">
-            <div className="mt-4">
-              <FormulaBox
-                label="Fórmula de SKUs"
-                content={`⌈ Total Créditos ÷ 100,000 ⌉  =  ⌈ ${fmtNum(result.totalCredits)} ÷ 100,000 ⌉  =  ${result.dscSkus} SKU${result.dscSkus !== 1 ? 's' : ''}`}
-                variant="symbolic"
-              />
-              <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-green-700 font-semibold uppercase tracking-wide">Resultado Comercial</p>
-                  <p className="text-4xl font-black text-green-700 mt-1">{result.dscSkus}</p>
-                  <p className="text-sm text-green-600">DSC SKU{result.dscSkus !== 1 ? 's' : ''}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-green-600">= {fmtNum(result.dscSkus * 100_000)} créditos comprometidos</p>
-                  <p className="text-xs text-green-500 mt-1">Redondeo siempre hacia arriba (⌈ceiling⌉)</p>
-                </div>
-              </div>
-              <TipBox tip={`Un SKU = 100,000 créditos anuales, siempre redondeado hacia arriba. Para esta estimación: ⌈${fmtNum(result.totalCredits)} ÷ 100,000⌉ = ${result.dscSkus} SKUs necesarios.`} />
+            <div className="mt-4 text-xs text-gray-500 bg-blue-50 rounded-lg p-3 mb-4 leading-relaxed">
+              Tarifas oficiales de consumo de Flex Credits para Salesforce Data 360. El modelo es de{' '}
+              <strong>consumo puro</strong>: cada operación consume créditos en proporción directa al volumen procesado.
+              No existen descuentos por edición ni licencias basadas en perfiles.
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-[11px] text-white uppercase tracking-wide bg-sf-blue">
+                    <th className="text-left py-2 px-3 rounded-tl-lg">#</th>
+                    <th className="text-left py-2 px-3">Operación</th>
+                    <th className="text-right py-2 px-3">Categoría</th>
+                    <th className="text-right py-2 px-3 rounded-tr-lg">Tarifa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {[
+                    { n: 1,  op: 'Batch Pipeline Ingestion',       cat: 'Ingesta',      rate: '2,000 / M filas' },
+                    { n: 2,  op: 'Batch Transform',                 cat: 'Ingesta',      rate: '400 / M filas' },
+                    { n: 3,  op: 'Streaming Engagement Events',     cat: 'Streaming',    rate: '5,000 / M filas' },
+                    { n: 4,  op: 'Streaming Profile Changes',       cat: 'Streaming',    rate: '5,000 / M filas' },
+                    { n: 5,  op: 'Streaming Transform',             cat: 'Streaming',    rate: '5,000 / M filas' },
+                    { n: 6,  op: 'Identity Resolution (Standard)',  cat: 'Unificación',  rate: '100,000 / M filas' },
+                    { n: 7,  op: 'Identity Resolution (Simple)',    cat: 'Unificación',  rate: '20,000 / M filas' },
+                    { n: 8,  op: 'Calculated Insights',             cat: 'Analítica',    rate: '15 / M filas' },
+                    { n: 9,  op: 'Data Explorer / Query API',       cat: 'Analítica',    rate: '2 / M filas' },
+                    { n: 10, op: 'Segmentation',                    cat: 'Segmentación', rate: '20 / M filas' },
+                    { n: 11, op: 'Audience Activation',             cat: 'Activación',   rate: '10 / M filas' },
+                    { n: 12, op: 'Data Graphs Creation',            cat: 'Graphs',       rate: '500 / grafo' },
+                    { n: 13, op: 'Data Spaces',                     cat: 'Plataforma',   rate: '500 / espacio' },
+                    { n: 14, op: 'Data Bundles',                    cat: 'Plataforma',   rate: '100 / bundle' },
+                    { n: 15, op: 'Predictive AI (Einstein)',        cat: 'IA',           rate: '1,000 / M filas' },
+                    { n: 16, op: 'Generative AI (Einstein)',        cat: 'IA',           rate: '5,000 / M tokens' },
+                    { n: 17, op: 'Consent & Preference Mgmt',      cat: 'Compliance',   rate: '5 / M filas' },
+                    { n: 18, op: 'Consent Activation',             cat: 'Compliance',   rate: '5 / M filas' },
+                    { n: 19, op: 'Real-Time Decisions',             cat: 'Activación',   rate: '10,000 / M decisiones' },
+                    { n: 20, op: 'Customer Graph (DMO)',            cat: 'Unificación',  rate: '50 / M filas' },
+                    { n: 21, op: 'Data Share (incoming)',           cat: 'Plataforma',   rate: '1,000 / M filas' },
+                  ].map((row, i) => (
+                    <tr key={row.n} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="py-2 px-3 font-mono text-gray-400">{row.n}</td>
+                      <td className="py-2 px-3 text-gray-800 font-medium">{row.op}</td>
+                      <td className="py-2 px-3 text-right text-gray-500">{row.cat}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-sf-blue">{row.rate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs text-amber-800 leading-relaxed">
+                <strong>Nota:</strong> Esta calculadora utiliza las tarifas de las operaciones{' '}
+                #1–#12 que corresponden al core del motor de estimación V3. Las operaciones #13–#21
+                (IA, Compliance, Real-Time Decisions, Data Share) requieren arquitectura adicional
+                y se recomienda incluirlas en el análisis técnico formal con Solution Engineering.
+              </p>
             </div>
           </div>
         )}
@@ -499,8 +446,8 @@ const StepByStepBreakdown: React.FC<Props> = ({ result, formData, onClose }) => 
         </p>
         <div className="space-y-2">
           {[
-            { label: 'Ingesta (post descuento)',   value: result.ingestionCredits },
-            { label: 'Streaming (post descuento)', value: result.streamingCredits },
+            { label: 'Ingesta',   value: result.ingestionCredits },
+            { label: 'Streaming', value: result.streamingCredits },
             { label: 'Identity Resolution',        value: result.unificationCredits },
             { label: 'Calculated Insights',        value: result.calcInsightsCredits },
             { label: 'Queries / Data Explorer',    value: result.queryCredits },
@@ -514,14 +461,8 @@ const StepByStepBreakdown: React.FC<Props> = ({ result, formData, onClose }) => 
             </div>
           ))}
           <div className="border-t border-white/20 pt-3 mt-1 flex justify-between items-center">
-            <span className="text-white font-bold text-sm">TOTAL CRÉDITOS / AÑO</span>
+            <span className="text-white font-bold text-sm">TOTAL FLEX CREDITS / AÑO</span>
             <span className="font-mono text-white text-xl font-extrabold">{fmtNum(result.totalCredits)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-blue-300 text-xs">⌈{fmtNum(result.totalCredits)} ÷ 100,000⌉</span>
-            <span className="text-blue-300 text-xs font-semibold">
-              = {result.dscSkus} DSC SKU{result.dscSkus !== 1 ? 's' : ''}
-            </span>
           </div>
         </div>
       </div>

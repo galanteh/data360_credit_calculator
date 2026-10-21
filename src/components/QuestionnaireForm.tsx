@@ -24,29 +24,6 @@ const SEGMENT_CREATION_OPTIONS = [
   { value: '1w', label: '~1 semana', description: 'Ciclo semanal manual', icon: '📅' },
   { value: 'manual', label: 'Manual / Ad-hoc', description: 'Sin proceso definido', icon: '🔧' },
 ];
-const EDITION_OPTIONS = [
-  {
-    value: 'flex',
-    label: 'Data Cloud Flex',
-    description: 'Precio estándar por crédito. Máxima flexibilidad.',
-    badge: 'Estándar',
-    badgeColor: 'bg-gray-100 text-gray-700',
-  },
-  {
-    value: 'profiles',
-    label: 'Data Cloud Profiles',
-    description: '15% descuento en ingesta y streaming. Basado en perfiles.',
-    badge: '-15%',
-    badgeColor: 'bg-blue-100 text-sf-blue',
-  },
-  {
-    value: 'enterprise',
-    label: 'Data Cloud Enterprise',
-    description: '30% descuento en ingesta y streaming. Máximo valor.',
-    badge: '-30%',
-    badgeColor: 'bg-green-100 text-green-700',
-  },
-];
 const IDENTITY_OPTIONS = [
   {
     value: 1,
@@ -701,9 +678,9 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
     return (
       <div className="animate-fade-in space-y-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Activación y Edición</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Activación</h2>
           <p className="text-gray-500 mt-1 text-sm">
-            Define los canales de activación y la edición de Data Cloud
+            Define los canales de activación y los parámetros de consumo
           </p>
         </div>
 
@@ -716,7 +693,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
             <p className="text-red-500 text-xs mb-3">{errors.channels}</p>
           )}
           <p className="text-xs text-gray-500 mb-4">
-            Selecciona todos los canales a los que activarás audiencias desde Data Cloud
+            Selecciona todos los canales a los que activarás audiencias desde Data 360
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {CHANNEL_OPTIONS.map((ch) => {
@@ -758,43 +735,13 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
           />
         </div>
 
-        {/* Edition */}
-        <div className="sf-card p-5">
-          <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide text-sf-blue mb-4">
-            Edición de Data Cloud
-          </h3>
-          <p className="text-xs text-gray-500 mb-4">
-            La edición determina el precio por crédito y las capacidades incluidas
-          </p>
-          <div className="space-y-3">
-            {EDITION_OPTIONS.map((ed) => (
-              <button
-                key={ed.value}
-                type="button"
-                onClick={() => onChange({ edition: ed.value as 'flex' | 'profiles' | 'enterprise' })}
-                className={`w-full text-left option-card ${formData.edition === ed.value ? 'selected' : ''}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-semibold text-sm text-gray-800">{ed.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{ed.description}</div>
-                  </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${ed.badgeColor}`}>
-                    {ed.badge}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="sf-card p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-sf-blue flex-shrink-0 mt-0.5" />
             <p className="text-xs text-blue-800">
               <strong>Listo para calcular.</strong> Al presionar "Calcular" se generará la
-              estimación de consumo anual de créditos Data 360, el desglose por categoría (Ingesta, Streaming,
-              Unificación, Analítica, Segmentación, Activación), los SKUs equivalentes y el impacto financiero (ROI).
+              estimación de consumo anual de Flex Credits Data 360, el desglose por categoría (Ingesta, Streaming,
+              Unificación, Analítica, Segmentación, Activación) y el impacto financiero (ROI).
               Estimación preliminar.
             </p>
           </div>

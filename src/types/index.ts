@@ -22,7 +22,6 @@ export interface FormData {
   channels: string[];
   activationsYr: number;
   engagementTimeframe: number; // default 30
-  edition: 'flex' | 'profiles' | 'enterprise';
 
   // Meta
   accountName: string;
@@ -63,7 +62,6 @@ export interface CalculationResult {
   ingestionCredits: number;
   streamingCredits: number;
   totalCredits: number;
-  dscSkus: number;
 
   // Maturity
   maturityScore: number;

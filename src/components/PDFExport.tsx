@@ -194,20 +194,6 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   if (form.contactName) doc.text(form.contactName, margin, 91);
   doc.text(today, margin, form.contactName ? 96 : 91);
 
-  // Edition badge
-  const editionLabel =
-    form.edition === 'flex'
-      ? 'Data Cloud Flex'
-      : form.edition === 'profiles'
-      ? 'Data Cloud Profiles'
-      : 'Data Cloud Enterprise';
-  setFill(doc, SF_BLUE);
-  doc.roundedRect(pageW - margin - 52, 77, 52, 10, 2, 2, 'F');
-  setFont(doc, WHITE);
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'bold');
-  doc.text(editionLabel, pageW - margin - 26, 83, { align: 'center' });
-
   // ── Executive Summary ──
   let y = 110;
   setFont(doc, SF_NAVY);
@@ -223,17 +209,17 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   setFont(doc, BLACK);
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  const summaryText = `Basado en los parámetros ingresados para ${form.accountName || 'la organización'}, Salesforce Data 360 requerirá una estimación de ${fmt(result.totalCredits)} créditos anuales, equivalentes a ${result.dscSkus} SKU(s) de Data Services Credits (DSC). El desglose principal incluye: Ingesta ${fmt(result.ingestionCredits)} créditos, Unificación de Identidad ${fmt(result.unificationCredits)} créditos, Segmentación ${fmt(result.segmentationCredits)} créditos y Streaming ${fmt(result.streamingCredits)} créditos. La organización se posiciona en el Nivel ${result.maturityLevel} de madurez digital ("${result.maturityLabel}") con una puntuación de ${result.maturityScore}/100. El beneficio económico anual estimado es de ${fmtMoney(result.totalAnnualBenefit)}.`;
+  const summaryText = `Basado en los parámetros ingresados para ${form.accountName || 'la organización'}, Salesforce Data 360 requerirá una estimación de ${fmt(result.totalCredits)} Flex Credits anuales. El desglose principal incluye: Ingesta ${fmt(result.ingestionCredits)} Flex Credits, Unificación de Identidad ${fmt(result.unificationCredits)} Flex Credits, Segmentación ${fmt(result.segmentationCredits)} Flex Credits y Streaming ${fmt(result.streamingCredits)} Flex Credits. La organización se posiciona en el Nivel ${result.maturityLevel} de madurez digital ("${result.maturityLabel}") con una puntuación de ${result.maturityScore}/100. El beneficio económico anual estimado es de ${fmtMoney(result.totalAnnualBenefit)}.`;
   const summaryLines = doc.splitTextToSize(summaryText, contentW);
   doc.text(summaryLines, margin, y);
   y += summaryLines.length * 5 + 6;
 
   // ── Top KPI Cards ──
   const kpiData = [
-    { label: 'Créditos Totales/Año', value: fmt(result.totalCredits), color: SF_BLUE },
-    { label: 'DSC SKUs', value: String(result.dscSkus), color: SF_GREEN },
-    { label: 'Créditos Ingesta', value: fmt(result.ingestionCredits), color: SF_ORANGE },
-    { label: 'Créditos Streaming', value: fmt(result.streamingCredits), color: [255, 93, 93] as RGB },
+    { label: 'Flex Credits/Año', value: fmt(result.totalCredits), color: SF_BLUE },
+    { label: 'Madurez Digital', value: `${result.maturityScore}/100`, color: MATURITY_COLORS[result.maturityLevel] },
+    { label: 'Flex Credits Ingesta', value: fmt(result.ingestionCredits), color: SF_ORANGE },
+    { label: 'Flex Credits Streaming', value: fmt(result.streamingCredits), color: [255, 93, 93] as RGB },
   ];
   const kpiW = (contentW - 12) / 4;
   kpiData.forEach((kpi, i) => {
@@ -360,7 +346,7 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   doc.text('Página 1 de 2', pageW / 2, pageH - 8, { align: 'center' });
   setFont(doc, GRAY_DARK);
   doc.setFontSize(6.5);
-  doc.text('Salesforce Data Cloud © 2025 — Estimación preliminar sujeta a validación técnica', pageW / 2, pageH - 4, { align: 'center' });
+  doc.text('Salesforce Data 360 © 2025 — Estimación preliminar sujeta a validación técnica', pageW / 2, pageH - 4, { align: 'center' });
 
   // ════════════════════════════════════════════════════════════════
   // PAGE 2 – Technical Details
@@ -461,32 +447,26 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   setFont(doc, WHITE);
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL CRÉDITOS / AÑO', margin + 2, y + 6);
+  doc.text('TOTAL FLEX CREDITS / AÑO', margin + 2, y + 6);
   doc.text(fmt(result.totalCredits), margin + contentW * 0.72, y + 6, { align: 'right' });
   doc.text('100%', margin + contentW, y + 6, { align: 'right' });
 
   y += 16;
 
-  // Edition note
+  // Flex Credits note
   setFill(doc, GRAY_LIGHT);
   setDraw(doc, SF_BLUE);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, y, contentW, 12, 2, 2, 'FD');
+  doc.roundedRect(margin, y, contentW, 10, 2, 2, 'FD');
   setFont(doc, SF_NAVY);
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Edición: ${form.edition.toUpperCase()}`, margin + 4, y + 5);
+  doc.text('Modelo de Consumo:', margin + 4, y + 4);
   setFont(doc, GRAY_DARK);
   doc.setFont('helvetica', 'normal');
-  const discountText =
-    form.edition === 'profiles'
-      ? 'Descuento del 15% aplicado a créditos de ingesta y streaming.'
-      : form.edition === 'enterprise'
-      ? 'Descuento del 30% aplicado a créditos de ingesta y streaming.'
-      : 'Sin descuento aplicado. Precio estándar por crédito.';
-  doc.text(discountText, margin + 40, y + 5);
-  doc.text(`DSC SKUs recomendados: ${result.dscSkus} (×100,000 créditos/SKU)`, margin + 4, y + 10);
-  y += 20;
+  doc.text('Flex Credits — consumo puro sin descuentos por edición. Total anual: ' + fmt(result.totalCredits) + ' Flex Credits.', margin + 40, y + 4);
+  doc.text('Tarifa de referencia: Rate Card oficial Salesforce Data 360 (V3)', margin + 4, y + 9);
+  y += 18;
 
   // ── Input Parameters Summary ──
   setFont(doc, SF_NAVY);
@@ -557,10 +537,10 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   doc.setFont('helvetica', 'italic');
   doc.text('Página 2 de 2', pageW / 2, pageH - 8, { align: 'center' });
   doc.setFontSize(6.5);
-  doc.text('Salesforce Data Cloud © 2025 — Estimación preliminar sujeta a validación técnica', pageW / 2, pageH - 4, { align: 'center' });
+  doc.text('Salesforce Data 360 © 2025 — Estimación preliminar sujeta a validación técnica', pageW / 2, pageH - 4, { align: 'center' });
 
   // Save
-  const fileName = `DataCloud_ROI_${(form.accountName || 'Estimacion').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const fileName = `Data360_FlexCredits_${(form.accountName || 'Estimacion').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
 }
 

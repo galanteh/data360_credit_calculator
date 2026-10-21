@@ -11,7 +11,7 @@ import {
   ReferenceLine,
   LabelList,
 } from 'recharts';
-import { Download, RefreshCw, TrendingUp, Zap, Database, Activity, CheckCircle } from 'lucide-react';
+import { Download, RefreshCw, TrendingUp, Database, Activity, CheckCircle } from 'lucide-react';
 import { CalculationResult, FormData } from '../types';
 import { generatePDF } from './PDFExport';
 import StepByStepBreakdown from './StepByStepBreakdown';
@@ -277,7 +277,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
                 </p>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">
-                {formData.accountName || 'Estimación Data Cloud'}
+                {formData.accountName || 'Estimación Data 360'}
               </h1>
               {formData.contactName && (
                 <p className="text-blue-200 text-sm mt-1">{formData.contactName}</p>
@@ -294,14 +294,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="text-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur min-w-[130px]">
                 <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide mb-1">
-                  Créditos / Año
+                  Flex Credits / Año
                 </p>
                 <div className="text-3xl font-black leading-tight">{fmt(result.totalCredits)}</div>
-                <div className="text-blue-200 text-xs mt-0.5">Data 360 Credits</div>
-                <div className="mt-2 bg-white/20 rounded-lg px-2 py-1">
-                  <span className="text-white text-xs font-bold">{result.dscSkus} DSC SKU{result.dscSkus !== 1 ? 's' : ''}</span>
-                  <span className="text-blue-300 text-xs ml-1">×100K</span>
-                </div>
+                <div className="text-blue-200 text-xs mt-0.5">Data 360 Flex Credits</div>
               </div>
               <div className="text-center bg-white/10 rounded-2xl px-4 py-4 backdrop-blur min-w-[110px]">
                 <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide mb-1">
@@ -321,13 +317,13 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
       </div>
 
       {/* ── KPI Cards Row 1 — Credits focused ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* PRIMARY: Total Credits */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* PRIMARY: Total Flex Credits */}
         <div className="kpi-card" style={{ borderTop: '3px solid #0070D2', background: 'linear-gradient(135deg, #f0f6ff 0%, #fff 100%)' }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-sf-blue font-semibold uppercase tracking-wide">
-                Créditos Totales / Año
+                Flex Credits / Año
               </p>
               <p className="text-2xl font-extrabold text-gray-900 mt-1">
                 {fmt(result.totalCredits)}
@@ -338,26 +334,12 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
           <p className="text-xs text-gray-400 mt-2">Estimación anual Data 360</p>
         </div>
 
-        {/* DSC SKUs */}
-        <div className="kpi-card" style={{ borderTop: '3px solid #4BCA81' }}>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-                DSC SKUs Necesarios
-              </p>
-              <p className="text-2xl font-extrabold text-gray-900 mt-1">{result.dscSkus}</p>
-            </div>
-            <Zap className="w-8 h-8 text-sf-green opacity-70" />
-          </div>
-          <p className="text-xs text-gray-400 mt-2">×100,000 créditos / SKU</p>
-        </div>
-
         {/* Ingestion */}
         <div className="kpi-card" style={{ borderTop: '3px solid #FFB75D' }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-                Créditos de Ingesta
+                Flex Credits Ingesta
               </p>
               <p className="text-2xl font-extrabold text-gray-900 mt-1">
                 {fmt(result.ingestionCredits)}
@@ -365,12 +347,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
             </div>
             <Activity className="w-8 h-8 text-sf-orange opacity-70" />
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            Batch + Transform
-            {result.ingestionCredits < (result.batchPipelineCredits + result.transformCredits) - 1
-              ? ' (desc. aplicado)'
-              : ''}
-          </p>
+          <p className="text-xs text-gray-400 mt-2">Batch + Transform</p>
         </div>
 
         {/* Streaming */}
@@ -378,7 +355,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-                Créditos Streaming
+                Flex Credits Streaming
               </p>
               <p className="text-2xl font-extrabold text-gray-900 mt-1">
                 {fmt(result.streamingCredits)}

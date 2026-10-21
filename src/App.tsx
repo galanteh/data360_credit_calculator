@@ -30,7 +30,6 @@ const DEFAULT_FORM_DATA: FormData = {
   channels: [],
   activationsYr: 500,
   engagementTimeframe: 30,
-  edition: 'flex',
 
   // Meta
   accountName: '',
@@ -56,7 +55,6 @@ const DEMO_DATA: FormData = {
   channels: ['email', 'paid_media'],
   activationsYr: 1000,
   engagementTimeframe: 30,
-  edition: 'profiles',
   accountName: 'Coral Cloud Resorts',
   contactName: '',
   logoBase64: undefined,

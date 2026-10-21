@@ -66,17 +66,8 @@ export function calculate(form: FormData): CalculationResult {
   const activation_credits = (activation_vol * 10) / 1_000_000;
   const data_graphs_credits = graphs * 500;
 
-  // Edition adjustments
-  let ingestionCredits = batch_pipeline_credits + transform_credits;
-  let streamingCredits = stream_eng_credits + stream_prof_credits + stream_transform_credits;
-
-  if (form.edition === 'profiles') {
-    ingestionCredits *= 0.85;
-    streamingCredits *= 0.85;
-  } else if (form.edition === 'enterprise') {
-    ingestionCredits *= 0.70;
-    streamingCredits *= 0.70;
-  }
+  const ingestionCredits = batch_pipeline_credits + transform_credits;
+  const streamingCredits = stream_eng_credits + stream_prof_credits + stream_transform_credits;
 
   const totalCredits =
     ingestionCredits +
@@ -87,8 +78,6 @@ export function calculate(form: FormData): CalculationResult {
     segmentation_credits +
     activation_credits +
     data_graphs_credits;
-
-  const dscSkus = Math.ceil(totalCredits / 100000);
 
   // MATURITY SCORE
   let maturityScore = 0;
@@ -156,7 +145,6 @@ export function calculate(form: FormData): CalculationResult {
     ingestionCredits,
     streamingCredits,
     totalCredits,
-    dscSkus,
     maturityScore,
     maturityLevel: maturityLevel as 1 | 2 | 3 | 4,
     maturityLabel: maturityLabels[maturityLevel],
