@@ -32,7 +32,7 @@ El resultado es una estimación técnica precisa del gasto en créditos Data 360
 | **Desglose por categoría** | Ingestion, Transform, Streaming, Identity Resolution, Calculated Insights, Queries, Segmentación, Activación y Data Graphs |
 | **Equivalencia de SKUs** | Calcula créditos totales y cantidad de DSC SKUs necesarios (1 SKU = 100,000 créditos) |
 | **Descuentos por Edición** | Flex Only, Profiles & Flex (−15%) y Enterprise Profiles & Flex (−30%) |
-| **Demo Steren** | Botón de carga rápida con el caso de referencia oficial (2M perfiles, 9M engagement, ~11.2M créditos) |
+| **Cargar Caso Demo** | Botón de carga rápida con datos de ejemplo de referencia oficial (2M perfiles, 9M engagement, ~11.2M créditos) |
 | **Logo del cliente** | Upload drag & drop (PNG/JPG/SVG) para personalizar el reporte con la marca del cliente |
 | **PDF ejecutivo** | Generación en el navegador de un informe de 2 páginas con jsPDF: créditos por categoría, ROI, parámetros y disclaimer |
 | **Índice de Madurez** | Puntuación 0–100 en 5 dimensiones: Streaming, Identidad, Segmentación, Analítica y Canales |
@@ -144,9 +144,9 @@ data360_credit_calculator/
 
 ---
 
-## 🧪 Caso de Prueba de Referencia (Steren)
+## 🧪 Caso de Prueba de Referencia (Datos de Ejemplo)
 
-Para validar el motor de cálculo usa el botón **"🧪 Demo Steren"** en la barra superior:
+Para validar el motor de cálculo usa el botón **"🧪 Cargar Caso Demo"** en la barra superior:
 
 | Parámetro | Valor |
 |---|---|

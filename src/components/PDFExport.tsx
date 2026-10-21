@@ -60,7 +60,36 @@ const MATURITY_COLORS: Record<number, RGB> = {
   4: [75, 202, 129],
 };
 
+// Convert the official logo SVG (served from /images/logo.svg) to a PNG data URL
+// by drawing it onto an offscreen canvas. Returns null if loading fails.
+async function loadOfficialLogoPng(size = 240): Promise<string | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(null); return; }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/png'));
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    // Append cache-buster so the browser actually loads it
+    img.src = '/images/logo.svg';
+  });
+}
+
 export async function generatePDF(result: CalculationResult, form: FormData): Promise<void> {
+  // Pre-load official logo as PNG (required by jsPDF addImage)
+  const officialLogoPng = await loadOfficialLogoPng(240);
+
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const pageH = 297;
@@ -79,37 +108,26 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   // Header gradient band
   gradientRect(doc, 0, 0, pageW, 72, SF_NAVY_DARK, SF_BLUE);
 
-  // Client logo or Salesforce text placeholder
-  if (form.logoBase64) {
+  // Official Data 360 logo — top-left of gradient band (white background pill)
+  if (officialLogoPng) {
     try {
-      // Determine format from data URL prefix
-      const formatMatch = form.logoBase64.match(/^data:image\/(\w+);base64,/);
-      const imgFormat = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
-      const safeFormat = ['PNG', 'JPEG', 'JPG', 'WEBP'].includes(imgFormat) ? imgFormat : 'PNG';
-      // Place logo in the header band, left side, constrained to 50×24mm
-      doc.addImage(form.logoBase64, safeFormat, margin, 8, 0, 20, undefined, 'FAST');
+      // Draw white pill background behind the logo for contrast on dark gradient
+      setFill(doc, WHITE);
+      doc.roundedRect(margin, 8, 26, 14, 2, 2, 'F');
+      // Logo is a 1:1 square (480×480 viewBox) → 14mm × 14mm, centered in the pill
+      doc.addImage(officialLogoPng, 'PNG', margin + 1, 9, 24, 12, undefined, 'FAST');
     } catch {
-      // Fallback: show account name if logo embedding fails
+      // fallback text if canvas/image conversion failed
       setFont(doc, WHITE);
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text(form.accountName || 'CLIENTE', margin, 18);
+      doc.text('SALESFORCE DATA 360', margin, 18);
     }
   } else {
-    // Salesforce brand text placeholder
     setFont(doc, WHITE);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text('SALESFORCE', margin, 14);
-
-    setFont(doc, [180, 210, 240]);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text('DATA CLOUD', margin, 19);
-
-    setDraw(doc, [255, 255, 255]);
-    doc.setLineWidth(0.3);
-    doc.line(margin, 22, margin + 40, 22);
+    doc.text('SALESFORCE DATA 360', margin, 18);
   }
 
   // Main title
@@ -155,6 +173,17 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   // Account info band
   setFill(doc, GRAY_LIGHT);
   doc.rect(0, 72, pageW, 28, 'F');
+
+  // If client uploaded a logo, show it in the account band (right-aligned)
+  if (form.logoBase64) {
+    try {
+      const fmtMatch = form.logoBase64.match(/^data:image\/(\w+);base64,/);
+      const fmt2 = fmtMatch ? fmtMatch[1].toUpperCase() : 'PNG';
+      const sf2 = ['PNG', 'JPEG', 'JPG', 'WEBP'].includes(fmt2) ? fmt2 : 'PNG';
+      doc.addImage(form.logoBase64, sf2, pageW - margin - 36, 74, 0, 20, undefined, 'FAST');
+    } catch { /* ignore */ }
+  }
+
   setFont(doc, SF_NAVY);
   doc.setFontSize(15);
   doc.setFont('helvetica', 'bold');
@@ -342,20 +371,19 @@ export async function generatePDF(result: CalculationResult, form: FormData): Pr
   setFill(doc, SF_NAVY);
   doc.rect(0, 0, pageW, 22, 'F');
 
-  // Logo on page 2 (small, left side)
-  if (form.logoBase64) {
+  // Official logo on page 2 (small, left side — same white pill approach)
+  if (officialLogoPng) {
     try {
-      const formatMatch = form.logoBase64.match(/^data:image\/(\w+);base64,/);
-      const imgFormat = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
-      const safeFormat = ['PNG', 'JPEG', 'JPG', 'WEBP'].includes(imgFormat) ? imgFormat : 'PNG';
-      doc.addImage(form.logoBase64, safeFormat, margin, 3, 0, 16, undefined, 'FAST');
+      setFill(doc, WHITE);
+      doc.roundedRect(margin, 3, 18, 16, 2, 2, 'F');
+      doc.addImage(officialLogoPng, 'PNG', margin + 1, 4, 16, 14, undefined, 'FAST');
     } catch { /* ignore */ }
   }
 
   setFont(doc, WHITE);
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  const p2TitleX = form.logoBase64 ? margin + 42 : margin;
+  const p2TitleX = officialLogoPng ? margin + 22 : margin;
   doc.text('Detalle Técnico de Créditos', p2TitleX, 14);
   setFont(doc, [150, 190, 240]);
   doc.setFontSize(8);

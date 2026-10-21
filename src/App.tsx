@@ -37,9 +37,8 @@ const DEFAULT_FORM_DATA: FormData = {
   logoBase64: undefined,
 };
 
-// Steren reference case — expected result: ~11.17M credits (official reference: ~11.27M)
-// Difference due to retail daily_update locked at 10% vs engine default 15%.
-const STEREN_DEMO_DATA: FormData = {
+// Demo reference case — expected result: ~11.17M credits (official V3 reference: ~11.27M)
+const DEMO_DATA: FormData = {
   industry: 'retail',
   profiles: 2_000_000,
   connectedSystems: 5,
@@ -56,8 +55,8 @@ const STEREN_DEMO_DATA: FormData = {
   activationsYr: 1000,
   engagementTimeframe: 30,
   edition: 'profiles',
-  accountName: 'Steren',
-  contactName: 'Caso de Prueba Oficial',
+  accountName: 'Empresa Retail (Demo)',
+  contactName: '',
   logoBase64: undefined,
   dailyUpdateOverride: 10,
 };
@@ -106,7 +105,7 @@ const App: React.FC = () => {
   const handleLoadDemo = useCallback(() => {
     setStep(1);
     setResults(null);
-    setFormData(STEREN_DEMO_DATA);
+    setFormData(DEMO_DATA);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -116,15 +115,16 @@ const App: React.FC = () => {
       <nav className="sticky top-0 z-50 shadow-sm" style={{ background: 'linear-gradient(135deg, #032D60 0%, #0070D2 100%)' }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Salesforce Cloud logo SVG */}
-            <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path
-                d="M11.5 3C12.7 1.2 14.7 0 17 0C20.3 0 23 2.7 23 6C23 6.3 23 6.5 22.9 6.8C24.2 7.3 25.1 8.5 25.1 10C25.1 11.9 23.6 13.4 21.7 13.4H7C4.8 13.4 3 11.6 3 9.4C3 7.4 4.5 5.8 6.4 5.5C6.1 5 6 4.5 6 4C6 2 7.6 0.5 9.5 0.5C10.2 0.5 10.9 0.7 11.5 1.1V3Z"
-                fill="white"
-                opacity="0.9"
+            {/* Official Salesforce Data 360 logo */}
+            <div className="bg-white rounded-lg px-2 py-1 flex items-center shadow-sm">
+              <img
+                src="/images/logo.svg"
+                alt="Salesforce Data 360"
+                className="h-8 object-contain"
+                style={{ minWidth: 32 }}
               />
-            </svg>
-            <div>
+            </div>
+            <div className="hidden sm:block">
               <div className="text-white font-bold text-sm leading-tight">Salesforce Data 360</div>
               <div className="text-blue-200 text-xs">Credit Calculator</div>
             </div>
@@ -150,9 +150,9 @@ const App: React.FC = () => {
                   type="button"
                   onClick={handleLoadDemo}
                   className="text-blue-200 text-xs font-medium bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-all border border-white/20 hidden sm:flex items-center gap-1.5"
-                  title="Precarga el caso de referencia Steren (2M perfiles, resultado ~11.17M créditos)"
+                  title="Carga datos de ejemplo (2M perfiles, 9M engagement, resultado ~11.17M créditos)"
                 >
-                  🧪 Demo Steren
+                  🧪 Cargar Caso Demo
                 </button>
               </>
             )}
