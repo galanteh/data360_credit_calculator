@@ -14,6 +14,7 @@ import {
 import { Download, RefreshCw, TrendingUp, Zap, Database, Activity, CheckCircle } from 'lucide-react';
 import { CalculationResult, FormData } from '../types';
 import { generatePDF } from './PDFExport';
+import StepByStepBreakdown from './StepByStepBreakdown';
 
 interface ResultsDashboardProps {
   result: CalculationResult;
@@ -226,6 +227,18 @@ const WaterfallTooltip: React.FC<{ active?: boolean; payload?: Array<{ payload: 
 // ── Main Dashboard ────────────────────────────────────────────────────────
 const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, onReset }) => {
   const [exporting, setExporting] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  if (showBreakdown) {
+    return (
+      <StepByStepBreakdown
+        result={result}
+        formData={formData}
+        onClose={() => setShowBreakdown(false)}
+      />
+    );
+  }
+
   const creditData = getCreditChartData(result);
   const waterfallData = getWaterfallData(result);
   const recs = RECOMMENDATIONS[result.maturityLevel];
@@ -651,6 +664,13 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, formData, o
       <div className="flex flex-col sm:flex-row justify-between gap-3 no-print">
         <button type="button" className="sf-btn-secondary" onClick={onReset}>
           <RefreshCw className="w-4 h-4" /> Recalcular
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowBreakdown(true)}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm border-2 border-sf-blue text-sf-blue bg-white hover:bg-blue-50 transition-all"
+        >
+          🎓 Ver Cálculo Paso a Paso (Modo Pedagógico)
         </button>
         <button
           type="button"
