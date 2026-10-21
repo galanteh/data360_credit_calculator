@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, AlertTriangle, Info } from 'lucide-react';
 import { FormData } from '../types';
-import { INDUSTRY_OPTIONS, CHANNEL_OPTIONS } from '../data/industryDefaults';
+import { INDUSTRY_OPTIONS, CHANNEL_OPTIONS, DATA_SOURCE_OPTIONS } from '../data/industryDefaults';
 import LogoUploader from './LogoUploader';
 
 interface QuestionnaireFormProps {
@@ -219,7 +219,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
           {errors.industry && (
             <p className="text-red-500 text-xs mb-3">{errors.industry}</p>
           )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {INDUSTRY_OPTIONS.map((ind) => (
               <button
                 key={ind.value}
@@ -229,28 +229,34 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
                     industry: ind.value,
                     profiles: formData.profiles || ind.defaultProfiles,
                     engagement: formData.engagement || ind.defaultEngagement,
+                    segments: ind.defaultSegments,
                   });
                   setErrors((e) => ({ ...e, industry: '' }));
                 }}
                 className={`option-card text-left ${formData.industry === ind.value ? 'selected' : ''}`}
               >
-                <div className="text-2xl mb-1">{ind.icon}</div>
+                <div className="text-xl mb-1">{ind.icon}</div>
                 <div className="text-xs font-semibold text-gray-800 leading-tight">{ind.label}</div>
+                <div className="text-[10px] text-gray-500 mt-1 leading-tight line-clamp-2">{ind.description}</div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Profiles */}
-        <div className="sf-card p-5">
-          <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide text-sf-blue mb-4">
+        {/* Profiles + Engagement + Connected Systems */}
+        <div className="sf-card p-5 space-y-6">
+          <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide text-sf-blue">
             Volumen de Datos
           </h3>
 
-          <div className="mb-5">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Perfiles Unificados (N)
+          {/* Profiles */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              ¿Cuántos clientes o prospectos únicos estimas tener en tus sistemas?
             </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Es el volumen total de personas, clientes o cuentas registradas en tu CRM, base de eCommerce, app móvil o puntos de venta <strong>antes</strong> de unificar duplicados.
+            </p>
             <div className="flex flex-wrap gap-2 mb-3">
               {PROFILE_QUICK.map((v) => (
                 <button
@@ -270,26 +276,50 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
             <input
               type="number"
               className="sf-input"
-              placeholder="O ingresa un número personalizado"
+              placeholder="O ingresa un valor personalizado"
               value={formData.profiles || ''}
               min={10000}
               step={100000}
               onChange={(e) => onChange({ profiles: Number(e.target.value) })}
             />
             <p className="text-xs text-gray-400 mt-1">
-              Actualmente: <strong>{formatNumber(formData.profiles)}</strong> perfiles
+              Seleccionado: <strong>{formatNumber(formData.profiles)}</strong> registros únicos
             </p>
           </div>
 
+          {/* Engagement */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Interacciones / Registros de Engagement Histórico
-              <span className="ml-1 text-xs text-gray-400">(transacciones, eventos, etc.)</span>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Volumen de Interacciones o Histórico de Eventos (Engagement)
             </label>
+            <p className="text-xs text-gray-500 mb-3">
+              ¿Cuántos registros de actividad generan tus clientes al año? Incluye compras en tienda física/online, clicks en correos, inicios de sesión en app/web, transacciones o tickets de servicio.
+            </p>
+
+            {/* Multiplier buttons */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="text-xs text-gray-500 self-center font-medium">Calcular automáticamente:</span>
+              {[
+                { label: '5× — B2B / Poca Frecuencia', mult: 5 },
+                { label: '8× — Promedio Industria', mult: 8 },
+                { label: '12× — B2C / Alta Recurrencia', mult: 12 },
+              ].map(({ label, mult }) => (
+                <button
+                  key={mult}
+                  type="button"
+                  disabled={!formData.profiles}
+                  onClick={() => onChange({ engagement: formData.profiles * mult })}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white text-gray-600 border-gray-200 hover:border-sf-blue hover:text-sf-blue disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             <input
               type="number"
               className="sf-input"
-              placeholder="Ej: 10000000"
+              placeholder="Ej: 10,000,000"
               value={formData.engagement || ''}
               min={0}
               step={500000}
@@ -297,30 +327,72 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({
             />
             <p className="text-xs text-gray-400 mt-1">
               Actualmente: <strong>{formatNumber(formData.engagement)}</strong> registros
+              {formData.profiles > 0 && formData.engagement > 0 && (
+                <span className="ml-2 text-blue-500">
+                  ({(formData.engagement / formData.profiles).toFixed(1)}× por perfil)
+                </span>
+              )}
             </p>
             {engagementWarning && (
               <div className="warning-box mt-2 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                 <span>
-                  El volumen de engagement parece bajo en relación con el número de perfiles.
-                  ¿Están incluidas todas las fuentes de datos?
+                  El volumen de engagement parece bajo. ¿Están incluidas todas las fuentes de datos?
                 </span>
               </div>
             )}
           </div>
 
-          <div className="mt-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Sistemas Conectados (fuentes de datos)
+          {/* Connected Systems — checkboxes */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              ¿Qué sistemas o fuentes aportarán datos a Data Cloud?
             </label>
-            <SliderField
-              label=""
-              value={formData.connectedSystems}
-              min={1}
-              max={20}
-              unit=" sistemas"
-              onChange={(v) => onChange({ connectedSystems: v })}
-            />
+            <p className="text-xs text-gray-500 mb-3">
+              Indica de dónde provendrán los datos para construir la vista unificada (Golden Record).
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {DATA_SOURCE_OPTIONS.map((src) => {
+                const selected = (formData.connectedSystemsSelected || []).includes(src.value);
+                return (
+                  <button
+                    key={src.value}
+                    type="button"
+                    onClick={() => {
+                      const current = formData.connectedSystemsSelected || [];
+                      const updated = selected
+                        ? current.filter((s) => s !== src.value)
+                        : [...current, src.value];
+                      onChange({ connectedSystemsSelected: updated, connectedSystems: updated.length });
+                    }}
+                    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                      selected
+                        ? 'border-sf-blue bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-sf-blue hover:bg-blue-50/30'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                      selected ? 'bg-sf-blue border-sf-blue' : 'border-gray-300'
+                    }`}>
+                      {selected && (
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-800">{src.icon} {src.label}</div>
+                      <div className="text-[11px] text-gray-500 mt-0.5">{src.description}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {(formData.connectedSystemsSelected || []).length > 0 && (
+              <p className="text-xs text-sf-blue mt-2 font-medium">
+                {(formData.connectedSystemsSelected || []).length} sistema{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''} seleccionado{(formData.connectedSystemsSelected || []).length !== 1 ? 's' : ''}
+              </p>
+            )}
           </div>
         </div>
 

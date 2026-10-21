@@ -1,13 +1,15 @@
 import { FormData, CalculationResult } from '../types';
 
 const INDUSTRY_DEFAULTS: Record<string, { daily_update: number; lookback_months: number }> = {
-  retail: { daily_update: 15, lookback_months: 24 },
-  banking: { daily_update: 5, lookback_months: 36 },
-  manufacturing: { daily_update: 8, lookback_months: 24 },
-  telecom: { daily_update: 20, lookback_months: 18 },
-  healthcare: { daily_update: 5, lookback_months: 36 },
-  media: { daily_update: 25, lookback_months: 12 },
-  energy: { daily_update: 3, lookback_months: 24 },
+  financial_services: { daily_update: 7,  lookback_months: 36 },
+  healthcare:         { daily_update: 5,  lookback_months: 36 },
+  manufacturing:      { daily_update: 4,  lookback_months: 12 },
+  consumer_goods:     { daily_update: 12, lookback_months: 24 },
+  retail:             { daily_update: 12, lookback_months: 24 },
+  communications:     { daily_update: 20, lookback_months: 18 },
+  media:              { daily_update: 25, lookback_months: 12 },
+  automotive:         { daily_update: 5,  lookback_months: 24 },
+  education:          { daily_update: 6,  lookback_months: 24 },
 };
 
 export function calculate(form: FormData): CalculationResult {

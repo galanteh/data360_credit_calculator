@@ -3,6 +3,7 @@ export interface FormData {
   industry: string;
   profiles: number; // N
   connectedSystems: number;
+  connectedSystemsSelected: string[];
   engagement: number; // historical interactions
 
   // Block 2

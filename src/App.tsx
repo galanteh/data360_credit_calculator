@@ -11,6 +11,7 @@ const DEFAULT_FORM_DATA: FormData = {
   industry: '',
   profiles: 1_000_000,
   connectedSystems: 3,
+  connectedSystemsSelected: [],
   engagement: 5_000_000,
 
   // Block 2
@@ -42,6 +43,7 @@ const DEMO_DATA: FormData = {
   industry: 'retail',
   profiles: 2_000_000,
   connectedSystems: 5,
+  connectedSystemsSelected: ['crm', 'ecommerce', 'pos', 'digital', 'marketing'],
   engagement: 9_000_000,
   streamEngPercent: 0,
   streamProfPercent: 0,
@@ -55,7 +57,7 @@ const DEMO_DATA: FormData = {
   activationsYr: 1000,
   engagementTimeframe: 30,
   edition: 'profiles',
-  accountName: 'Empresa Retail (Demo)',
+  accountName: 'Coral Clouds Resort & Hotels',
   contactName: '',
   logoBase64: undefined,
   dailyUpdateOverride: 10,
@@ -116,14 +118,11 @@ const App: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Official Salesforce Data 360 logo */}
-            <div className="bg-white rounded-lg px-2 py-1 flex items-center shadow-sm">
-              <img
-                src="/images/logo.svg"
-                alt="Salesforce Data 360"
-                className="h-8 object-contain"
-                style={{ minWidth: 32 }}
-              />
-            </div>
+            <img
+              src="/images/logo.svg"
+              alt="Salesforce Data 360"
+              className="h-9 object-contain"
+            />
             <div className="hidden sm:block">
               <div className="text-white font-bold text-sm leading-tight">Salesforce Data 360</div>
               <div className="text-blue-200 text-xs">Credit Calculator</div>
@@ -152,7 +151,7 @@ const App: React.FC = () => {
                   className="text-blue-200 text-xs font-medium bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-all border border-white/20 hidden sm:flex items-center gap-1.5"
                   title="Carga datos de ejemplo (2M perfiles, 9M engagement, resultado ~11.17M créditos)"
                 >
-                  🧪 Cargar Caso Demo
+                  🧪 Cargar Demo (Coral Clouds)
                 </button>
               </>
             )}
